@@ -100,7 +100,7 @@ p {
 .content {
 /*    position: relative;*/
     position: fixed;
-    left: 1%;
+/*    left: 1%;*/
     top: -7%;
     z-index: 2;
     font-size: 13px;
@@ -449,8 +449,8 @@ button {
     margin: 1em 0;
 }
     .content {
-        position: fixed;
-        left: 1%;
+        position: relative;
+/*        left: 1%;*/
         top: -7%;
         z-index: 2;
         font-size: 13px;

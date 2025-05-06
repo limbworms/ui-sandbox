@@ -1,5 +1,5 @@
 import { Rnd } from "react-rnd";
-import { ethers } from "../../node_modules/ethers/dist/ethers.min.js";
+import { ethers } from "../../../node_modules/ethers/dist/ethers.min.js";
 import React, {useEffect,useState} from 'react';
 import "./CallBox.css";
 
