@@ -6,6 +6,8 @@ import {
 } from "@dnd-kit/sortable";
 
 import {Console} from "../Draggables/ConsoleFactory.tsx"
+import {SortableItem} from "../Draggables/SortableItem.tsx"
+
 
 const console_component = <Console />;
                           // id="Console" 
@@ -33,28 +35,37 @@ export function Droppable(props) {
     >
       <div ref={setNodeRef} style={props.style}>
 
-        {items.map((item_obj) => {
-              return <Console   id={item_obj} 
-                                key={item_obj} 
-                                className={"content"} 
-                      />
+        {items.map((item_obj, index) => {
+          console.log(item_obj, index, id)
+
+          if(item_obj.startsWith("Console")){
+            return <Console   id={item_obj} 
+                              key={item_obj} 
+                              className={"console content"}
+                              group={props.id}
+                              stateItems={props.stateItems}
+                              stateItemAttrs={props.stateItemAttrs}
+                              setStateItemGroups={props.setStateItemGroups}
+                              setStateItemAttrs={props.setStateItemAttrs}
+                              style = {{width:400,height:260,minWidth:400,zIndex:4}}
+                    />
+
+            }else if(!item_obj.startsWith("Console")){
+              // console.log(itemAttrs[index])
+             // var attrKeys = new Array()
+             // var attrVals = new Array()
+             // Object.keys(itemAttrs[index]).map((key) => {
+             //  attrKeys.push(key);
+             //  attrVals.push(itemAttrs[index][key])
+             // })
+             // console.log(attrKeys)
+             // console.log(attrVals)
+              // console.dir(JSON.parse(itemAttrs[index]))
+             return <SortableItem className={"content"} key={item_obj} keyname={item_obj} id={item_obj} attr={itemAttrs[index]} style={{width:400,height:310,minWidth:400,zIndex:4}}>{item_obj}</SortableItem>
+            }
           })
-          // <SortableItem key={id} id={id} />
         }
 
-
-
-{/*        {items.length===itemAttrs.length ? items.map((item_obj, index) => {
-          if(itemAttrs[index].key==="Console"){
-              return <Console   id={itemAttrs[index].read.id} 
-                                key={itemAttrs[index].read.key} 
-                                className={itemAttrs[index].read.className}
-                                style = {itemAttrs[index].read.style}
-                      />
-          }
-          // <SortableItem key={id} id={id} />
-        })
-        : null}*/}
       </div>
     </SortableContext>
   );

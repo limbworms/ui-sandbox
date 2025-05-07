@@ -40,13 +40,6 @@ export function Console(props) {
 
   
 // new ethers.JsonRpcProvider("http://localhost:8545") 
-    useEffect(() => {
-      const selectNode = document.querySelector("#talk");
-      var pushUser = "type :help to list commands";
-      const node = document.createElement('p');
-      node.innerHTML = "@> " + `${pushUser}`;
-      document.querySelector("#talk").append(node);
-  }, []);
   
 
 async function onKeyPressHandler(e){
@@ -70,11 +63,11 @@ async function onKeyPressHandler(e){
 async function etherSpeak(e){
   switch(state.term.replace("ethers@","").trim()){
     case "spawn":
-      var _store_ids = props.arrayIdsState;
+      var _store_ids = props.stateItems;
       var id_name = uuidv4();
 
-      _store_ids.push(id_name);
-      var _store_target = props.arrayTargetsState;
+      _store_ids[props.group].push(id_name);
+      var _store_target = props.stateItemAttrs;
       var _store_json = new Object();
         _store_json.id = id_name
         _store_json.hash = "0x200b";
@@ -94,11 +87,11 @@ async function etherSpeak(e){
         _store_json.number = "0x200b";
         _store_json.parentBeaconBlockRoot = "0x200b";
 
-      _store_target.push(JSON.stringify(_store_json));
-      props.setArrayIdsState(_store_ids);
-      props.setArrayTargetsState(_store_target);
+      _store_target[props.group].push(JSON.stringify(_store_json));
+      props.setStateItemGroups(_store_ids);
+      props.setStateItemAttrs(_store_target);
       // console.log(props.arrayIdsState)
-      console.log(props.arrayTargetsState)
+      console.log(props.stateItemAttrs)
       break;
 
     case "getTransactions":
@@ -116,6 +109,8 @@ async function etherSpeak(e){
 
             var _store_ids = props.arrayIdsState;
             var id_name = uuidv4();
+
+            // var replyObject = {key:"Console", read: {id:"Console", type:"Console", className:"content console", key:"Console", parent:"dropleft", style:{width:400,height:320,minWidth:400,zIndex:4}
 
             _store_ids.push(id_name);
             var _store_target = props.arrayTargetsState;
@@ -138,13 +133,22 @@ async function etherSpeak(e){
               _store_json.number = values.number
               _store_json.parentBeaconBlockRoot = values.parentBeaconBlockRoot
 
-            _store_target.push(JSON.stringify(_store_json));
+
+            var _store_node = { key: id_name,  
+                                read: { id:"Console", 
+                                        type:"Console", 
+                                        className:"content console", 
+                                        key:"Console", 
+                                        parent:"dropleft", 
+                                        style:{width:400,height:320,minWidth:400,zIndex:2}, 
+                                        contents: _store_json}}
+
+            _store_target.push(_store_node);
+            // _store_target.push(JSON.stringify(_store_json));
             props.setArrayIdsState(_store_ids);
-            props.setArrayTargetsState(_store_target);
+            props.setArrayTargetsState(JSON.stringify(_store_target));
             console.log(props.arrayIdsState)
             console.log(props.arrayTargetsState)
-
-
 
             console.log("works")
 
@@ -274,81 +278,4 @@ function reducer(state, action) {
 function closeWindow(){
   console.log('hi')
 }
-
-
-    // this.setState({userMessages: pushUser});
-    // this.setState({userMessagePointer: pushUser.length})
-
-    // if(this.state.term.startsWith("debug:")){
-    //   this.debug();
-    //   return;
-    // }
-
-    // switch(this.state.term.trim()){
-    // case(":clear"): 
-    //   this.setState({term: ""});  
-      
-    //   while (selectNode.firstChild) {
-    //     selectNode.removeChild(selectNode.lastChild);
-    //   }
-    //   break;
-
-    // case(":reset"): 
-    //   this.setState({term: ""});
-    //   this.setState({messages: []})
-    //   while (selectNode.firstChild) {
-    //     selectNode.removeChild(selectNode.lastChild);
-    //   }
-    //   break;
-
-    // case(":purge"): 
-    //   this.setState({term: ""});
-    //   this.setState({messages: []})
-    //   this.setState({userMessagePointer: 0, userMessages: [""]});
-    //   break;
-
-    // case(":help"): 
-    //   this.setState({term: ""});
-    //   const responseNode = document.createElement('p');
-    //   responseNode.innerHTML = "@>" + `Here are some commands you can execute:\n    :clear ––clears the terminal\n    :purge ––removes terminal history\n    :reset ––wipes messages from my memory\n    :help ––displays help\n    :quit ––closes this window`;
-    //   selectNode.append(responseNode);
-    //   this.scrollToBottom();
-    //   break;
-
-    // // case(":connect"): <- get the variable written in term, lex it out
-
-    // case(":quit"): this.closeWindow();
-    //   break;
-
-    // default: 
-    //   this.etherSpeak();
-    // }
-  // } else if (e.key === 'Tab' && this.state.term.startsWith(":")){
-
-  // } else if (e.key === 'ArrowUp'){
-  //   if (this.state.userMessagePointer-1>=0 &&  this.state.userMessages.length!=0){
-  //     this.setState({
-  //       term: this.state.userMessages[this.state.userMessagePointer-1]
-  //       })
-  //     this.setState({userMessagePointer: this.state.userMessagePointer-1})
-  //   }
-
-  // } else if (e.key === 'ArrowDown'){
-  //   if (this.state.userMessagePointer+1<this.state.userMessages.length){
-  //     this.setState({
-  //       term: this.state.userMessages[this.state.userMessagePointer+1]
-  //       })
-  //     this.setState({userMessagePointer: this.state.userMessagePointer+1})
-  //   }
-
-  //   else{
-  //     this.setState({term: ""})
-  //   }
-  // }
-  // }
-// };
-
-
-
-
 

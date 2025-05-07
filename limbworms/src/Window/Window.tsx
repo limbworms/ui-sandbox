@@ -18,19 +18,6 @@ import { Draggable } from "./Draggables/DragFactory.jsx"
 import { Console } from "./Draggables/ConsoleFactory.jsx"
 
 import { arrayMove, insertAtIndex, removeAtIndex } from "./utils/array";
-
-
-
-
-
-
-
-
-
-
-
-
-
 import "./Window.css";
 
 // import { Plasma } from "../assets/plasma.js";
@@ -73,31 +60,20 @@ export default function Window(props){
       mouseSensor,
       touchSensor,
     );
-    const [arrayIdsState, setArrayIdsState] = useState(new Array())
-    const [arrayTargetsState, setArrayTargetsState] = useState(new Array())
+
     const [isCallingState, setIdCallingState] = useState("hidden");
-
-          // <Console id="Console" className="content console"
-          //                         key="Console"
-          //                         parent={"dropleft"}
-          //                         arrayIdsState={arrayIdsState}
-          //                         arrayTargetsState={arrayTargetsState}
-          //                         setArrayIdsState={handleArrayIdsChange}
-          //                         setArrayTargetsState={handleArrayTargetsChange}
-          //                         style = {{width:400,height:320,minWidth:400,zIndex:4}}/>
-
 
     const groupStyles = {dropleft:{flex: 1,minHeight:800, background:"red"},dropright:{flex: 1,minHeight:800, background:"blue"}}
 
     const [itemGroups, setItemGroups] = useState({
-      dropleft: ["Console"],
-      dropright: [],
+      dropleft: ["Console0"],
+      dropright: ["Console1"],
     });
 
     // const [items, setItems] = useState({
     const [itemAttrs, setItemAttrs] = useState({
-      dropleft: [{key:"Console", read: {id:"Console", type:"Console", className:"content console", key:"Console", parent:"dropleft", style:{width:400,height:320,minWidth:400,zIndex:4}}}],
-      dropright: [],
+      dropleft: [JSON.stringify({key:"Console0", read: {id:"Console0", type:"Console0", className:"content console", key:"Console0", parent:"dropleft", style:{width:400,height:320,minWidth:400,zIndex:4}}})],
+      dropright: [JSON.stringify({key:"Console", read: {id:"Console1", type:"Console1", className:"content console", key:"Console1", parent:"dropright", style:{width:400,height:320,minWidth:400,zIndex:4}}})],
     });
 
 
@@ -105,26 +81,60 @@ export default function Window(props){
 
   const handleDragStart = ({ active }) => setActiveId(active.id);
   const handleDragCancel = () => setActiveId(null);
-
   const handleDragOver = ({ active, over }) => {
     const overId = over?.id;
     if (!overId) {
       return;
     }
 
-    console.dir(active)
-    console.dir(over)
-
     const activeContainer = active.data.current.sortable.containerId; //adapt this
     const overContainer = over.data.current?.sortable.containerId || over.id; //adapt that
 
     if (activeContainer !== overContainer) {
+
+      setItemAttrs((itemAttrs) => {
+        const activeIndex = active.data.current.sortable.index;
+        const overIndex =
+          over.id in itemGroups
+            ? itemGroups[overContainer].length + 1
+            : over.data.current.sortable.index;
+
+
+        return moveBetweenContainers(
+          itemAttrs,
+          activeContainer,
+          activeIndex,
+          overContainer,
+          overIndex,
+          active.id
+        );
+      });
+
+
       setItemGroups((itemGroups) => {
         const activeIndex = active.data.current.sortable.index;
         const overIndex =
           over.id in itemGroups
             ? itemGroups[overContainer].length + 1
             : over.data.current.sortable.index;
+
+        console.log(moveBetweenContainers(
+          itemGroups,
+          activeContainer,
+          activeIndex,
+          overContainer,
+          overIndex,
+          active.id
+        ))
+
+        console.log(moveBetweenContainers(
+          itemAttrs,
+          activeContainer,
+          activeIndex,
+          overContainer,
+          overIndex,
+          active.id
+        ))
 
         return moveBetweenContainers(
           itemGroups,
@@ -135,17 +145,20 @@ export default function Window(props){
           active.id
         );
       });
+    
+
+
     }
   };
 
   const handleDragEnd = ({ active, over }) => {
+
     if (!over) {
       setActiveId(null);
       return;
     }
 
     if (active.id !== over.id) {
-      console.log(active.data.current.sortable.containerId)
       const activeContainer = active.data.current.sortable.containerId;
       const overContainer = over.data.current?.sortable.containerId || over.id;
       const activeIndex = active.data.current.sortable.index;
@@ -153,6 +166,25 @@ export default function Window(props){
         over.id in itemGroups
           ? itemGroups[overContainer].length + 1
           : over.data.current.sortable.index;
+
+      setItemAttrs((itemAttrs) => {
+        const activeIndex = active.data.current.sortable.index;
+        const overIndex =
+          over.id in itemGroups
+            ? itemGroups[overContainer].length + 1
+            : over.data.current.sortable.index;
+
+
+        return moveBetweenContainers(
+          itemAttrs,
+          activeContainer,
+          activeIndex,
+          overContainer,
+          overIndex,
+          active.id
+        );
+      });
+
 
       setItemGroups((itemGroups) => {
         let newItems;
@@ -192,9 +224,28 @@ export default function Window(props){
     item
   ) => {
     return {
+      // ...items,
+      // [activeContainer]: removeAtIndex(items[activeContainer], activeIndex),
+      // [overContainer]: insertAtIndex(items[overContainer], overIndex, item),
+
       ...items,
-      [activeContainer]: removeAtIndex(items[activeContainer], activeIndex),
-      [overContainer]: insertAtIndex(items[overContainer], overIndex, item),
+      [activeContainer]: [...items[activeContainer].filter((itemz) => itemz !== item),],
+      [overContainer]: [...items[overContainer], items[activeContainer][activeIndex],],
+
+                    // [...array.slice(0, index), item, ...array.slice(index)];
+
+                    // items[activeContainer][activeIndex],
+
+// export const removeAtIndex = (array, index) => {
+//   return [...array.slice(0, index), ...array.slice(index + 1)];
+// };
+
+// export const insertAtIndex = (array, index, item) => {
+//   return [...array.slice(0, index), item, ...array.slice(index)];
+// };
+
+
+
     };
   };
 
@@ -234,11 +285,16 @@ export default function Window(props){
                         activeId={activeId}
                         style = {groupStyles[group]} 
                         items={itemGroups[group]} 
-                        itemAttrs={itemAttrs[group]}/>
+                        itemAttrs={itemAttrs[group]}
+                        stateItems={itemGroups}
+                        stateItemAttrs={itemAttrs}
+                        setStateItemGroups={setItemGroups}
+                        setStateItemAttrs={setItemAttrs}
+                        />
             ))}
 
         <DragOverlay>
-          {activeId ? <Console id={activeId} dragOverlay /> : null}
+          {activeId ? <Console id={activeId} className={"console content"} style = {{width:400,height:260,minWidth:400,zIndex:4}} dragOverlay /> : null} 
         </DragOverlay>
         </DndContext>
       </div>
