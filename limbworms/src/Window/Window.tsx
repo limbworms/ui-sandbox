@@ -1,5 +1,5 @@
 import React, {useEffect, useState, useCallback} from 'react';
-// import {useDroppable} from '@dnd-kit/core';
+
 import { 
   DndContext, 
   closestCorners, 
@@ -9,19 +9,18 @@ import {
   useSensor,
   useSensors,} from '@dnd-kit/core';
 
-  // import { arrayMove } from "@dnd-kit/sortable";
-
-
 import type { MouseEvent, TouchEvent } from 'react';
 import { Droppable } from "./Drop/Dropfield.jsx"
 import { Draggable } from "./Draggables/DragFactory.jsx"
 import { Console } from "./Draggables/ConsoleFactory.jsx"
+import { Sidebar } from "./Component/Sidebar.jsx"
+// import { Head } from "./Component/Head.jsx"
 
 import { arrayMove, insertAtIndex, removeAtIndex } from "./utils/array";
 import "./Window.css";
 
 // import { Plasma } from "../assets/plasma.js";
-const IGNORE_TAGS = ["A","INPUT"];
+const IGNORE_TAGS = ["A","INPUT","BUTTON"];
 
 // Block Dnd, if IGNORE_TAGS includes elements tag or element has data-no-dnd attribute
 const customHandleEvent = (element: HTMLElement | null) => {
@@ -37,47 +36,56 @@ const customHandleEvent = (element: HTMLElement | null) => {
   return true;
 };
 
-MouseSensor.activators = [
-  {eventName: 'onMouseDown',
-    handler: ({ nativeEvent: event }: MouseEvent) => customHandleEvent(event.target as HTMLElement),
-  },];
-
-TouchSensor.activators = [
-  {eventName: 'onTouchStart',
-    handler: ({ nativeEvent: event }: TouchEvent) => customHandleEvent(event.target as HTMLElement),
-  },];
-
-
-
-
+MouseSensor.activators = [{eventName: 'onMouseDown', handler: ({ nativeEvent: event }: MouseEvent) => customHandleEvent(event.target as HTMLElement),},];
+TouchSensor.activators = [{eventName: 'onTouchStart',handler: ({ nativeEvent: event }: TouchEvent) => customHandleEvent(event.target as HTMLElement),},];
 
 export default function Window(props){
-    const forceUpdate = useCallback(() => updateState({}), []);
-    const mouseSensor = useSensor(MouseSensor);
-    const touchSensor = useSensor(TouchSensor);
-  
-    const sensors = useSensors(
-      mouseSensor,
-      touchSensor,
-    );
+  const forceUpdate = useCallback(() => updateState({}), []);
+  const mouseSensor = useSensor(MouseSensor);
+  const touchSensor = useSensor(TouchSensor);
 
-    const [isCallingState, setIdCallingState] = useState("hidden");
+  const sensors = useSensors(
+    useSensor(MouseSensor, {
+        activationConstraint: {
+          distance: 8,
+        },
+      }),
+      useSensor(TouchSensor, {
+        activationConstraint: {
+          delay: 200,
+          tolerance: 6,
+        },
+      }),
+  );
 
-    const groupStyles = {dropleft:{flex: 1,minHeight:800, background:"red"},dropright:{flex: 1,minHeight:800, background:"blue"}}
+  const [isCallingState, setIdCallingState] = useState("hidden");
+  const groupStyles = {dropleft:{flex: 1,minHeight:800, background:"#232326"},dropright:{flex: 1,minHeight:800, background:"#28282c"}}
+  const [itemGroups, setItemGroups] = useState({
+    dropleft: ["Console0"],
+    dropright: ["Console1"],
+  });
 
-    const [itemGroups, setItemGroups] = useState({
-      dropleft: ["Console0"],
-      dropright: ["Console1"],
-    });
+  const [itemAttrs, setItemAttrs] = useState({
+    dropleft: [JSON.stringify({key:"Console0", read: {id:"Console0", type:"Console0", className:"content console", key:"Console0", parent:"dropleft", style:{width:400,height:320,minWidth:400,zIndex:4}}})],
+    dropright: [JSON.stringify({key:"Console1", read: {id:"Console1", type:"Console1", className:"content console", key:"Console1", parent:"dropright", style:{width:400,height:320,minWidth:400,zIndex:4}}})],
+  });
 
-    // const [items, setItems] = useState({
-    const [itemAttrs, setItemAttrs] = useState({
-      dropleft: [JSON.stringify({key:"Console0", read: {id:"Console0", type:"Console0", className:"content console", key:"Console0", parent:"dropleft", style:{width:400,height:320,minWidth:400,zIndex:4}}})],
-      dropright: [JSON.stringify({key:"Console", read: {id:"Console1", type:"Console1", className:"content console", key:"Console1", parent:"dropright", style:{width:400,height:320,minWidth:400,zIndex:4}}})],
-    });
-
-
+  const [boolHook, setBoolHook] = useState(false);
   const [activeId, setActiveId] = useState(null);
+
+
+  // useEffect(() => {
+  //   console.log('here 78')
+  //   setItemAttrs(itemAttrs);
+  //   setItemGroups(itemGroups);
+  // },[itemGroups, itemAttrs])
+
+
+  function handleArrayMutate(e) {
+    setBoolHook(!boolHook);
+  }
+
+
 
   const handleDragStart = ({ active }) => setActiveId(active.id);
   const handleDragCancel = () => setActiveId(null);
@@ -99,8 +107,7 @@ export default function Window(props){
             ? itemGroups[overContainer].length + 1
             : over.data.current.sortable.index;
 
-
-        return moveBetweenContainers(
+        return moveAttrsBetweenContainers(
           itemAttrs,
           activeContainer,
           activeIndex,
@@ -117,24 +124,6 @@ export default function Window(props){
           over.id in itemGroups
             ? itemGroups[overContainer].length + 1
             : over.data.current.sortable.index;
-
-        console.log(moveBetweenContainers(
-          itemGroups,
-          activeContainer,
-          activeIndex,
-          overContainer,
-          overIndex,
-          active.id
-        ))
-
-        console.log(moveBetweenContainers(
-          itemAttrs,
-          activeContainer,
-          activeIndex,
-          overContainer,
-          overIndex,
-          active.id
-        ))
 
         return moveBetweenContainers(
           itemGroups,
@@ -174,8 +163,7 @@ export default function Window(props){
             ? itemGroups[overContainer].length + 1
             : over.data.current.sortable.index;
 
-
-        return moveBetweenContainers(
+        return moveAttrsBetweenContainers(
           itemAttrs,
           activeContainer,
           activeIndex,
@@ -232,22 +220,33 @@ export default function Window(props){
       [activeContainer]: [...items[activeContainer].filter((itemz) => itemz !== item),],
       [overContainer]: [...items[overContainer], items[activeContainer][activeIndex],],
 
-                    // [...array.slice(0, index), item, ...array.slice(index)];
+    };
+  };
 
-                    // items[activeContainer][activeIndex],
 
-// export const removeAtIndex = (array, index) => {
-//   return [...array.slice(0, index), ...array.slice(index + 1)];
-// };
+  const moveAttrsBetweenContainers = (
+    items,
+    activeContainer,
+    activeIndex,
+    overContainer,
+    overIndex,
+    item
+  ) => {
 
-// export const insertAtIndex = (array, index, item) => {
-//   return [...array.slice(0, index), item, ...array.slice(index)];
-// };
+    console.dir(items)
+    return {
+      // ...items,
+      // [activeContainer]: removeAtIndex(items[activeContainer], activeIndex),
+      // [overContainer]: insertAtIndex(items[overContainer], overIndex, item),
 
+      ...items,
+      [activeContainer]: [...items[activeContainer].filter((itemz) => JSON.parse(itemz).key !== item),],
+      [overContainer]: [...items[overContainer], items[activeContainer][activeIndex],],
 
 
     };
   };
+
 
 
 
@@ -269,6 +268,8 @@ export default function Window(props){
     }
 
     return(  <>
+      {/*<Head />*/}
+      <Sidebar/>
       <div  className="row-container"
             style={{display: "flex", flexDirection: "row",}}>
         <DndContext 
@@ -290,6 +291,7 @@ export default function Window(props){
                         stateItemAttrs={itemAttrs}
                         setStateItemGroups={setItemGroups}
                         setStateItemAttrs={setItemAttrs}
+                        onChange={handleArrayMutate}
                         />
             ))}
 

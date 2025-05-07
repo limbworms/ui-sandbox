@@ -41,7 +41,6 @@ export function Console(props) {
   
 // new ethers.JsonRpcProvider("http://localhost:8545") 
   
-
 async function onKeyPressHandler(e){
     // console.log(e)
     if (e.key === 'Enter') {
@@ -92,6 +91,7 @@ async function etherSpeak(e){
       props.setStateItemAttrs(_store_target);
       // console.log(props.arrayIdsState)
       console.log(props.stateItemAttrs)
+      props.onChange()
       break;
 
     case "getTransactions":
@@ -143,10 +143,9 @@ async function etherSpeak(e){
                                         style:{width:400,height:320,minWidth:400,zIndex:2}, 
                                         contents: _store_json}}
 
-            _store_target.push(_store_node);
-            // _store_target.push(JSON.stringify(_store_json));
+            _store_target.push(JSON.stringify(_store_node));
             props.setArrayIdsState(_store_ids);
-            props.setArrayTargetsState(JSON.stringify(_store_target));
+            props.setArrayTargetsState(_store_target);
             console.log(props.arrayIdsState)
             console.log(props.arrayTargetsState)
 
@@ -166,8 +165,6 @@ async function etherSpeak(e){
         console.log()
     } 
 }
-
-
 
 async function keyRouter(e){
     if (e.key === 'Enter'){
@@ -199,9 +196,52 @@ async function keyRouter(e){
     }
   }
 
+  function closeWindow(value){
+    var _store_ids = props.stateItems;
+
+// stateItems
+// stateItemAttrs
+// setStateItemGroups
+// setStateItemAttrs
+
+    var _store_target = props.stateItemAttrs;
+
+    var index = _store_ids[props.group].indexOf(value);
+
+    if (index > -1) {
+      _store_ids[props.group].splice(index, 1);
+    }
+
+    if (index > -1) {
+      _store_target[props.group].splice(index, 1);
+    }
+
+    console.dir(_store_ids)
+    console.dir(_store_target)
+
+    console.dir(_store_ids[props.group])
+    console.dir(_store_target[props.group])
+
+    props.setStateItemGroups(_store_ids)
+    props.setStateItemAttrs(_store_target)
+    props.onChange()
+
+    // props.setArrayIdsState(_store_ids);
+    // props.setArrayTargetsState(_store_target);
+
+    //1 remove window
+    //2 update state arrays to remove console and its attrs.
+    // const selfNode = document.querySelector()
+
+  }
+
+
+
+
+
   return (
-    <div className={props.className} id={props.id} ref={setNodeRef} style={style} {...listeners} {...attributes}>
-      <div id="popBoxTitle" className="headerTitle" >
+    <div className={props.className} id={props.id} ref={setNodeRef} style={style}  {...attributes}>
+      <div id="popBoxTitle" className="headerTitle"{...listeners}>
         <div className="topTitleLine"></div>
         <div className="titleLines"></div>
         <div className="titleLines"></div>
@@ -209,8 +249,8 @@ async function keyRouter(e){
         <div className="titleLines"></div>
         <div className="bottomTitleLines"></div>
         <div id="popBoxTitleHandle" className="callTitle"> {props.id} </div>
-        <div id="popBoxTitleCloseBox" className="control-box close-box" onClick={closeWindow}>
-        <a id="popBoxTitleCloseInner" className="control-box-inner" ></a>
+        <div id="popBoxTitleCloseBox" className="control-box close-box" >
+        <a id="popBoxTitleCloseInner" className="control-box-inner" onClick={() => { if(!isDragging){ closeWindow(props.id); } }}></a>
         </div>
       </div >
 
@@ -273,9 +313,5 @@ function reducer(state, action) {
     }
   }
   throw Error('Unknown action: ' + action.type);
-}
-
-function closeWindow(){
-  console.log('hi')
 }
 

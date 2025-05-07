@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useDroppable } from "@dnd-kit/core";
 import {
   SortableContext,
@@ -26,6 +26,12 @@ export function Droppable(props) {
 
   const { setNodeRef } = useDroppable({ id });
 
+  // function handleChange(e) {     //use this pattern to prop drill your setState functions. 
+  //   setQuery(e.target.value);
+  // }
+
+
+
   return (
     <SortableContext
       id={id}
@@ -35,7 +41,8 @@ export function Droppable(props) {
     >
       <div ref={setNodeRef} style={props.style}>
 
-        {items.map((item_obj, index) => {
+        {items.length>0 ?
+          items.map((item_obj, index) => {
           console.log(item_obj, index, id)
 
           if(item_obj.startsWith("Console")){
@@ -48,22 +55,14 @@ export function Droppable(props) {
                               setStateItemGroups={props.setStateItemGroups}
                               setStateItemAttrs={props.setStateItemAttrs}
                               style = {{width:400,height:260,minWidth:400,zIndex:4}}
+                              onChange={props.onChange}
                     />
 
             }else if(!item_obj.startsWith("Console")){
-              // console.log(itemAttrs[index])
-             // var attrKeys = new Array()
-             // var attrVals = new Array()
-             // Object.keys(itemAttrs[index]).map((key) => {
-             //  attrKeys.push(key);
-             //  attrVals.push(itemAttrs[index][key])
-             // })
-             // console.log(attrKeys)
-             // console.log(attrVals)
-              // console.dir(JSON.parse(itemAttrs[index]))
              return <SortableItem className={"content"} key={item_obj} keyname={item_obj} id={item_obj} attr={itemAttrs[index]} style={{width:400,height:310,minWidth:400,zIndex:4}}>{item_obj}</SortableItem>
             }
           })
+          : null
         }
 
       </div>

@@ -228,7 +228,7 @@ p {
 
 nav {
       background-color: #eee;
-      border-bottom: 1px solid black;
+/*      border-bottom: 1px solid black;*/
   }
 
   body {
@@ -395,8 +395,8 @@ button {
     }
 
     nav {
-          background-color: #1a1a1a;
-          border-bottom: 1px solid white;
+          background-color: #232326;
+/*          border-bottom: 1px solid white;*/
       }
 
 

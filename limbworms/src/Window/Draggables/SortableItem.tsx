@@ -31,9 +31,9 @@ export function SortableItem(props) {
       style={style}
       ref={setNodeRef}
       {...attributes}
-      {...listeners}
+
     >
-      <div id="popBoxTitle" className="headerTitle" >
+      <div {...listeners} id="popBoxTitle" className="headerTitle" >
         <div className="topTitleLine"></div>
         <div className="titleLines"></div>
         <div className="titleLines"></div>
